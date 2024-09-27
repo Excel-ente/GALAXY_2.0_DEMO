@@ -1,0 +1,33 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="#" id="confirm-action" class="actions">Actualizar</a>
+    </li>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var confirmActionLink = document.getElementById('confirm-action');
+            var selectAllCheckbox = document.getElementById('action-toggle');
+            var actionSelect = document.getElementById('action');
+            var actionForm = document.getElementById('changelist-form');
+            
+            confirmActionLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                
+                if (selectAllCheckbox.checked || actionForm.elements['_selected_action[]'].value) {
+                    if (confirm('¿Estás seguro de que deseas actualizar los elementos seleccionados?')) {
+                        actionForm.action = actionSelect.value;
+                        actionForm.submit();
+                    }
+                } else {
+                    alert('No se han seleccionado elementos para actualizar.');
+                }
+            });
+        });
+    </script>
+{% endblock %}

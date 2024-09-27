@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+{% load static %}
+{% load humanize %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        .card-custom {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0px;
+            height: 90%;
+        }
+        .card-header-custom {
+            background-color: rgb(44,62,80);
+            color: white;
+            font-weight: bold;
+        }
+        .card-body-custom {
+            font-size: large;
+            flex-grow: 1; /* Para que la tarjeta crezca uniformemente */
+        }
+        .card-subtitle {
+            font-size: small;
+            color: grey;
+        }
+    </style>
+</head>
+<body>
+    <div class="card border-light">
+        <div class="card border-light">
+
+            <div id="configuracionModal" class="modal fade" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Inicializar Configuración</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="configuracionForm" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">  
+            
+                <div class="row">
+                    
+                    <!-- Ventas Card -->
+                    <div class="col-lg-2 col-md-6 col-sm-12">
+                        <div class="card card-custom">
+                            <div class="card-header card-header-custom">Ventas {{ mes_actual }}</div>
+                            <div class="card-body card-body-custom">
+                                <div class="h4">{{ configuracion.moneda }} {{ ventas_mes_actual|floatformat:2|intcomma }}</div>
+                                <hr>
+                                <div class="card-subtitle">Total ventas mes anterior</div>
+                                <div class="h5 text-secondary">{{ configuracion.moneda }} {{ ventas_mes_anterior|floatformat:2|intcomma }}</div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Compras Card -->
+                    <div class="col-lg-2 col-md-6 col-sm-12">
+                        <div class="card card-custom">
+                            <div class="card-header card-header-custom">Compras {{ mes_actual }}</div>
+                            <div class="card-body card-body-custom">
+                                <div class="h4">{{ configuracion.moneda }} {{ compras_mes_actual|floatformat:2|intcomma }}</div>
+                                <hr>
+                                <div class="card-subtitle">Total compras mes anterior</div>
+                                <div class="h5 text-secondary">{{ configuracion.moneda }} {{ compras_mes_anterior|floatformat:2|intcomma }}</div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Stock Card -->
+                    <div class="col-lg-2 col-md-6 col-sm-12">
+                        <div class="card card-custom">
+                            <div class="card-header card-header-custom">Valuación Stock</div>
+                            <div class="card-body card-body-custom">
+                                <div class="h4">{{ configuracion.moneda }} {{ valuacion_inventario|floatformat:2|intcomma }}</div>
+                                <hr>
+                                <div class="card-subtitle">Insumos compuestos</div>
+                                <div class="h5 text-secondary">{{ configuracion.moneda }} {{ valuacion_inventario_compuesto|floatformat:2|intcomma }}</div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Gastos Card -->
+                    <div class="col-lg-2 col-md-6 col-sm-12">
+                        <div class="card card-custom">
+                            <div class="card-header card-header-custom">Gastos</div>
+                            <div class="card-body card-body-custom">
+                                <div class="h4">{{ configuracion.moneda }} {{ gastos_mes_actual|floatformat:2|intcomma }}</div>
+                                <hr>
+                                <div class="card-subtitle">Total gastos mes anterior</div>
+                                <div class="h5 text-secondary">{{ configuracion.moneda }} {{ gastos_mes_anterior|floatformat:2|intcomma }}</div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- C.C. Proveedores Card -->
+                    <div class="col-lg-2 col-md-6 col-sm-12">
+                        <div class="card card-custom">
+                            <div class="card-header card-header-custom">C.C. Proveedores</div>
+                            <div class="card-body card-body-custom">
+                                <div class="h4">{{ configuracion.moneda }} {{ cuenta_corriente_proveedores|floatformat:2|intcomma }}</div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- C.C. Clientes Card -->
+                    <div class="col-lg-2 col-md-6 col-sm-12">
+                        <div class="card card-custom">
+                            <div class="card-header card-header-custom">C.C. Clientes</div>
+                            <div class="card-body card-body-custom">
+                                <div class="h4">{{ configuracion.moneda }} {{ cuenta_corriente_clientes|floatformat:2|intcomma }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <hr>
+
+            <!-- Tabla ranking productos -->
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card">
+                            <div class="card-header text-center text-light" style="font-size: x-large;background-color: rgb(44,62,80)"><b>Productos vendidos en {{ mes_actual }}</b></div>
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Producto</th>
+                                            <th>Cantidad Vendida</th>
+                                            <th>Subtotal</th>
+                                            <th>Ganancias</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for venta in ventas_producto_mes %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ venta.producto__PRODUCTO }}</td>
+                                            <td>{{ venta.total_vendido|floatformat:2|intcomma }} {{ venta.producto__UNIDAD_MEDIDA  }}</td>
+                                            <td>{{ configuracion.moneda }} {{ venta.subtotal|floatformat:2|intcomma }}</td>
+                                            <td>{{ configuracion.moneda }} {{ venta.ganancias|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card">
+                            <div class="card-header text-light text-center" style="font-size: x-large;background-color: rgb(44,62,80)"><b>Historico de ventas</b></div>
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Día</th>
+                                            <th>Total vendido</th>
+                                            <th>Ganancias estimadas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for fecha, total_venta, ganancias_dash_total in venta_dash %}
+                                        <tr>
+                                            <td>{{ fecha }}</td>
+                                            <td>{{ configuracion.moneda }}  {{ total_venta|floatformat:2|intcomma }}</td>
+                                            <td>{{ configuracion.moneda }}  {{ ganancias_dash_total|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        <tr style="background-color: rgb(44,62,80)">
+                                            <td class="text-light">Total</td>
+                                            <td class="text-light">{{ configuracion.moneda }}  {{ venta_dash_total|floatformat:2|intcomma }}</td>
+                                            <td class="text-light">{{ configuracion.moneda }}  {{ ganancias_dash_total|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                            </div>
+                        </div>
+                    
+
+                    </div>
+                </div>
+            </div>
+        
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var inicial = "{{ inicial|escapejs }}";
+            if (inicial === "False") {
+                $('#configuracionModal').modal('show');
+            }
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+{% load static %}
+{% load humanize %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi tienda</title>
+
+    <link rel="stylesheet" href="{%static 'css/bootstrap.min.css' %}">
+
+    <style>
+        /* Estilo para el texto emergente */
+    .hover-text {
+        display: none;
+        position: absolute;
+        background-color: #ff7979;
+        padding: 5px;
+        border: 1px solid #000000;
+        border-radius: 3px;
+        margin-top: -25px; /* Ajusta la posición vertical según tus necesidades */
+        margin-left: 10px; /* Ajusta la posición horizontal según tus necesidades */
+        z-index: 1; /* Asegura que el texto esté por encima de otros elementos */
+    }
+    
+    /* Mostrar el texto emergente en el hover */
+    .btn:hover .hover-text {
+        display: inline-block;
+    }
+    
+    .fixed-size-card {
+        /* Establece un tamaño fijo para la tarjeta y su contenido */
+        width: 100%; /* Puedes ajustar esto según tus necesidades */
+        height: 100%; /* Puedes ajustar esto según tus necesidades */
+    }
+    
+    .fixed-size-card .card-body {
+            /* Asegúrate de que el cuerpo de la tarjeta ocupe el espacio disponible */
+        height: 100%; /* Puedes ajustar esto según tus necesidades */
+    }
+    .header-container {
+        background-color: #2C3E50; /* Un azul oscuro elegante */
+        color: #FFFFFF;
+        padding: 20px;
+        text-align: center;
+        }
+
+    .welcome-title {
+        font-size: 2em; /* Tamaño grande */
+        margin: 0;
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .action-button {
+        background-color: #3498DB; /* Un azul más claro */
+        color: #FFFFFF;
+        border: none;
+        padding: 10px 20px;
+        margin-left: 10px; /* Asegura un espaciado entre botones */
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 1em;
+    }
+
+    .action-button:hover {
+        background-color: #2980B9; /* Un azul un poco más oscuro para el efecto hover */
+        }
+
+    .new-product {
+        background-color: #2ECC71; /* Verde para el botón de nuevo producto */
+        }
+
+    .new-product:hover {
+        background-color: #27AE60; /* Verde más oscuro para el hover */
+        }
+
+    </style>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+</head>
+<body>
+  
+
+    
+    <div class="header-container">
+
+        <h1 class="welcome-title" style="text-align: start;">Bienvenido a su Tienda</h1>
+        <div class="header-actions">
+        <!-- <a href="/producto/create" class="action-button new-product">Nuevo Producto</a> -->
+        <button class="action-button download-pricelist" onclick="descargarListaPrecios()">Descargar lista de precios</button>
+        </div>
+   
+    </div>
+      
+    
+    <div class="row p-3">
+       
+        <div id="" class="row col-12 mt-3">
+            {% for producto in producto_list %}
+                
+                {% if producto.HABILITAR_VENTA == True %}
+                    <div id="" class="col-sm-6 col-md-5 col-lg-3 py-2">
+                        <div class="card fixed-size-card mr-2 text-dark">
+                            <div class="card-header" style="background-color: rgb(44,62,80);">   
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p class="text-light m-0">En stock:</p>
+                                        <b class="text-light m-0">{{ producto.stock_str }}</b>
+                                    </div>
+                                    <div class="col-6">
+                                        <b class="text-light">Categoría:</b>
+                                        <br>
+                                        <b class="text-primary">{{ producto.categoria|default:'Sin categoría' }}</b>
+                                        <!-- <button type="button" class="btn btn-danger btn-circle" data-toggle="modal" 
+                                        data-target="">
+                                        <i class="fas fa-cart-plus"></i> Agregar 
+                                        </button>           -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body  text-center">
+
+                                {% if configuracion.mostrar_foto %}
+                                    {% if producto.IMAGEN %}
+                                        <img src="{{ producto.IMAGEN.url }}" alt="{{ producto }}" class="img-fluid" style="height: 150px;">
+                                        <hr>
+                                        {% else %}
+                                        <img src="{% static 'producto/placeholder.png' %}" alt="Imagen no disponible" class="img-fluid" style="height: 150px;">
+                                        <hr>
+                                    {% endif %}
+
+                                {% else %}
+
+                                {% endif %}
+                                
+                                <p class="text-success text-uppercase">
+                                    <b class="text-uppercase" style="font-size: x-large;color: rgb(44,62,80);">
+                                        <p class="card-title">{{ producto.PRODUCTO }}</p>
+                                    </b>
+                                    <b class= "card-subtitle">
+                                        x 1 {{ producto.UNIDAD_MEDIDA }}
+                                    </b>
+                                    <p class="text-danger card-title" style="font-size: x-large;">{{ configuracion.moneda }} {{ producto.precio_venta|floatformat:2|intcomma }}</p>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+             
+            {% endfor %}
+            {% for producto in producto_compuesto_list %}
+                {% if producto.HABILITAR_VENTA == True %}
+                    <div id="" class="col-sm-6 col-md-5 col-lg-3 py-2">
+                        <div class="card fixed-size-card mr-2 text-dark">
+                            <div class="card-header" style="background-color: rgb(44,62,80);">   
+                                <div class="row">
+                                    <div class="col-5">
+                                        <!-- <p class="text-light m-0">En stock:</p>
+                                        <b class="text-light m-0">{{ producto.stock_str }}</b> -->
+                                    </div>
+                                    <div class="col-7">
+                                        <b class="text-light text-center m-0">{{ producto.CATEGORIA|default:'' }}</b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body  text-center">
+
+                                {% if configuracion.mostrar_foto %}
+                                    {% if producto.IMAGEN %}
+                                        <img src="{{ producto.IMAGEN.url }}" alt="{{ producto }}" class="img-fluid" style="height: 150px;">
+                                        <hr>
+                                        {% else %}
+                                        <img src="{% static 'producto/placeholder.png' %}" alt="Imagen no disponible" class="img-fluid" style="height: 150px;">
+                                        <hr>
+                                    {% endif %}
+
+                                {% else %}
+
+                                {% endif %}
+                                
+                                <p class="text-success text-uppercase">
+                                    <b class="text-uppercase" style="font-size: x-large;color: rgb(44,62,80);">
+                                        <p class="card-title">{{ producto.DESCRIPCION }}</p>
+                                    </b>
+                                    <b class= "card-subtitle">
+                                        x 1 {{ producto.UNIDAD_MEDIDA }}
+                                    </b>
+                                    <p class="text-danger card-title" style="font-size: x-large;">{{ configuracion.moneda }} {{ producto.precio_unitario|floatformat:2|intcomma }}</p>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div style="display:none;">
+            <table id="listaPreciosTable">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Stock Actual</th>
+                        <th>Unidad de medida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in producto_list %}
+                        {% if producto.HABILITAR_VENTA %}
+                            <tr>
+                                <td>{{ producto.PRODUCTO }}</td>
+                                <td>{{ producto.CATEGORIA|default:'Sin categoría' }}</td>
+                                <td>{{ producto.precio_venta|floatformat:2|intcomma }}</td>
+                                <td>{{ producto.stock_actual }}</td>
+                                <td>{{ producto.UNIDAD_MEDIDA }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% for producto_compuesto in producto_compuesto_list %}
+                        {% if producto_compuesto.HABILITAR_VENTA %}
+                            <tr>
+                                <td>{{ producto_compuesto.DESCRIPCION }}</td>
+                                <td>{{ producto_compuesto.CATEGORIA|default:'Sin categoría' }}</td>
+                                <td>{{ producto_compuesto.precio_unitario|floatformat:2 }}</td>
+                                <td>No Aplica</td>
+                                <td>Unidades</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.7.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+<script>
+    function descargarListaPrecios() {
+        var table = document.getElementById("listaPreciosTable");
+    
+        // Crear un objeto para la hoja de cálculo
+        var ws = XLSX.utils.table_to_sheet(table);
+    
+        // Recorrer las celdas de la hoja de cálculo
+        for (var cell in ws) {
+            // Asegúrate de que no estás modificando los encabezados de la tabla ni celdas no deseadas
+            if(cell[0] === '!') continue; // Saltar propiedades que no son celdas
+    
+            // Aquí asumimos que quieres cambiar el formato en la columna de precios, por ejemplo la columna "C"
+            // Verifica la referencia de tu columna correcta donde se encuentran los precios
+            if (/^C\d+$/.test(cell)) {
+                var value = ws[cell].v;
+    
+                // Dividir el valor por 100 y formatearlo a dos decimales
+                var newValue = value / 100;
+                ws[cell].v = newValue.toFixed(2); // Asegúrate de que newValue es un número para usar toFixed
+            }
+        }
+    
+        // Crear un libro de Excel y agregar la hoja de cálculo
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Lista de Precios");
+    
+        // Guardar el archivo
+        var nombreArchivo = "lista_precios.xlsx";
+        XLSX.writeFile(wb, nombreArchivo);
+    }
+    </script>
+    
+
+
+</html>
